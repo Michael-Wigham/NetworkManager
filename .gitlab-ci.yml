@@ -47,10 +47,10 @@ variables:
   #
   # This is done by running `ci-fairy generate-template` and possibly bump
   # ".default_tag".
-  FEDORA_TAG:  '2022-03-15.0-7b3d39bfc5ca'
+  FEDORA_TAG:  '2022-03-15.0-d1522eaa7dd0'
   UBUNTU_TAG:  '2022-03-15.0-2cd0d40675ab'
   DEBIAN_TAG:  '2022-03-15.0-2cd0d40675ab'
-  CENTOS_TAG:  '2022-03-15.0-7b3d39bfc5ca'
+  CENTOS_TAG:  '2022-03-15.0-d1522eaa7dd0'
   ALPINE_TAG:  '2022-03-15.0-17672b94a192'
 
   FEDORA_EXEC: 'bash .gitlab-ci/fedora-install.sh'
