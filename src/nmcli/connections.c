@@ -5585,8 +5585,6 @@ ask_option(NmCli *nmc, NMConnection *connection, const NMMetaAbstractInfo *abstr
 
 again:
     value = nmc_readline(&nmc->nmc_config, "%s", prompt);
-    if (multi && !value)
-        return;
 
     if (!set_option(nmc, connection, abstract_info, value, FALSE, &error)) {
         g_printerr("%s\n", error->message);
