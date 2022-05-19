@@ -167,6 +167,12 @@ alias n="ninja -C build"
 
 alias l='ls -l --color=auto'
 
+ulimit -c unlimited
+
+export G_DEBUG=fatal-warnings
+
+unset DEBUGINFOD_URLS
+
 Clean() {
     systemctl stop NetworkManager
     rm -i -rf /run/NetworkManager
@@ -233,8 +239,8 @@ nmcli connection add type pppoe con-name ppp-net1 ifname ppp-net1 pppoe.parent n
 for i in {1..9}; do nm-env-prepare.sh --prefix eth -i \$i; done
 systemctl status NetworkManager
 systemctl stop NetworkManager
-systemctl stop NetworkManager; /opt/test/sbin/NetworkManager --debug 2>&1 | tee -a /tmp/nm-log.txt
 systemctl stop NetworkManager; gdb -ex run --args /opt/test/sbin/NetworkManager --debug
+systemctl stop NetworkManager; /opt/test/sbin/NetworkManager --debug 2>&1 | tee -a ./nm-log.txt
 EOF
 
     cat <<EOF | tmp_file "$BASEDIR/data-gdbinit"
