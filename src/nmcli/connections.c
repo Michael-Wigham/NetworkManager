@@ -52,6 +52,7 @@ typedef struct _OptionInfo {
                               NMConnection             *connection,
                               const struct _OptionInfo *option,
                               const char               *value,
+                              gboolean                  allow_reset,
                               GError                  **error);
     CompEntryFunc generator_func;
 } OptionInfo;
@@ -4375,7 +4376,7 @@ set_option(NmCli                    *nmc,
                        NULL,
                        NULL);
     if (option && option->check_and_set) {
-        return option->check_and_set(nmc, connection, option, value, error);
+        return option->check_and_set(nmc, connection, option, value, allow_reset, error);
     } else if (value || allow_reset) {
         return set_property(nmc->client,
                             connection,
@@ -4506,6 +4507,7 @@ set_connection_type(NmCli            *nmc,
                     NMConnection     *con,
                     const OptionInfo *option,
                     const char       *value,
+                    gboolean          allow_reset,
                     GError          **error)
 {
     const NMMetaSettingValidPartItem *const *type_settings;
@@ -4570,6 +4572,7 @@ set_connection_iface(NmCli            *nmc,
                      NMConnection     *con,
                      const OptionInfo *option,
                      const char       *value,
+                     gboolean          allow_reset,
                      GError          **error)
 {
     if (value) {
@@ -4592,6 +4595,7 @@ set_connection_master(NmCli            *nmc,
                       NMConnection     *con,
                       const OptionInfo *option,
                       const char       *value,
+                      gboolean          allow_reset,
                       GError          **error)
 {
     const GPtrArray     *connections;
@@ -4637,6 +4641,7 @@ set_bond_option(NmCli            *nmc,
                 NMConnection     *con,
                 const OptionInfo *option,
                 const char       *value,
+                gboolean          allow_reset,
                 GError          **error)
 {
     NMSettingBond *s_bond;
@@ -4681,6 +4686,7 @@ set_bond_monitoring_mode(NmCli            *nmc,
                          NMConnection     *con,
                          const OptionInfo *option,
                          const char       *value,
+                         gboolean          allow_reset,
                          GError          **error)
 {
     NMSettingBond *s_bond;
@@ -4721,6 +4727,7 @@ set_bluetooth_type(NmCli            *nmc,
                    NMConnection     *con,
                    const OptionInfo *option,
                    const char       *value,
+                   gboolean          allow_reset,
                    GError          **error)
 {
     NMSetting *setting;
@@ -4769,6 +4776,7 @@ set_ip4_address(NmCli            *nmc,
                 NMConnection     *con,
                 const OptionInfo *option,
                 const char       *value,
+                gboolean          allow_reset,
                 GError          **error)
 {
     NMSettingIPConfig *s_ip4;
@@ -4796,6 +4804,7 @@ set_ip6_address(NmCli            *nmc,
                 NMConnection     *con,
                 const OptionInfo *option,
                 const char       *value,
+                gboolean          allow_reset,
                 GError          **error)
 {
     NMSettingIPConfig *s_ip6;
