@@ -198,7 +198,7 @@ main(int argc, char *argv[])
     confs = g_array_new(FALSE, FALSE, sizeof(NMUtilsNamedValue));
     g_array_set_clear_func(confs, (GDestroyNotify) nm_utils_named_value_clear_with_g_free);
 
-    if (carrier_timeout_sec != 0) {
+    {
         nm_auto_unref_keyfile GKeyFile *keyfile = NULL;
         NMUtilsNamedValue               v;
 
@@ -212,9 +212,24 @@ main(int argc, char *argv[])
         g_key_file_set_int64(keyfile,
                              NM_CONFIG_KEYFILE_GROUPPREFIX_DEVICE "-15-carrier-timeout",
                              NM_CONFIG_KEYFILE_KEY_DEVICE_CARRIER_WAIT_TIMEOUT,
-                             carrier_timeout_sec * 1000);
-        if (!dump_to_stdout)
-            add_keyfile_comment(keyfile, "from \"rd.net.timeout.carrier\"");
+                             (carrier_timeout_sec != 0 ? carrier_timeout_sec : 15) * 1000);
+        if (carrier_timeout_sec == 0) {
+            /* If the command line doesn't specify "rd.net.timeout.carrier=",
+             * we set a default carrier timeout, but only in initrd.
+             * If the user specified a custom timeout, that is valid also
+             * after switch root.
+             */
+            g_key_file_set_value(keyfile,
+                                 NM_CONFIG_KEYFILE_GROUP_CONFIG,
+                                 NM_CONFIG_KEYFILE_KEY_CONFIG_ENABLE,
+                                 "env:initrd");
+        }
+
+        if (!dump_to_stdout) {
+            add_keyfile_comment(keyfile,
+                                carrier_timeout_sec != 0 ? "from \"rd.net.timeout.carrier\""
+                                                         : "default initrd carrier timeout");
+        }
 
         v = (NMUtilsNamedValue){
             .name      = g_strdup_printf("%s/15-carrier-timeout.conf", run_config_dir),
