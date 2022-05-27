@@ -69,8 +69,10 @@ _ppp_mgr_stage3_maybe_ready(NMDevicePpp *self)
         const NMPppMgrIPData *ip_data;
 
         ip_data = nm_ppp_mgr_get_ip_data(priv->ppp_mgr, addr_family);
-        if (ip_data->ip_received)
+        if (ip_data->ip_received) {
+            nm_device_l3cfg_ignore_commit(device, addr_family, FALSE);
             nm_device_devip_set_state(device, addr_family, NM_DEVICE_IP_STATE_READY, ip_data->l3cd);
+        }
     }
 
     if (nm_ppp_mgr_get_state(priv->ppp_mgr) >= NM_PPP_MGR_STATE_HAVE_IP_CONFIG)
@@ -111,6 +113,13 @@ _ppp_mgr_callback(NMPppMgr *ppp_mgr, const NMPppMgrCallbackData *callback_data, 
                                         NM_DEVICE_STATE_REASON_CONFIG_FAILED);
                 return;
             }
+
+            /* pppd also tries to configure addresses by itself, and quits if
+             * it fails to do so. So, we are not allowed to commit on the device
+             * until pppd sends us an IP configuration (which happens after it
+             * has finished configuring the interface).
+             */
+            nm_device_l3cfg_ignore_commit(device, AF_UNSPEC, TRUE);
 
             if (old_name)
                 nm_manager_remove_device(NM_MANAGER_GET, old_name, NM_DEVICE_TYPE_PPP);
@@ -259,6 +268,7 @@ deactivate(NMDevice *device)
 {
     NMDevicePpp *self = NM_DEVICE_PPP(device);
 
+    nm_device_l3cfg_ignore_commit(device, AF_UNSPEC, FALSE);
     _ppp_mgr_cleanup(self);
 }
 
