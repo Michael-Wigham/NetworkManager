@@ -3875,6 +3875,17 @@ nm_device_l3cfg_commit(NMDevice *self, NML3CfgCommitType commit_type, gboolean c
     nm_l3cfg_commit(priv->l3cfg, commit_type);
 }
 
+void
+nm_device_l3cfg_ignore_commit(NMDevice *self, int addr_family, gboolean ignore)
+{
+    NMDevicePrivate *priv = NM_DEVICE_GET_PRIVATE(self);
+
+    if (!priv->l3cfg)
+        return;
+
+    nm_l3cfg_ignore_commit(priv->l3cfg, addr_family, ignore);
+}
+
 static void
 _dev_l3_cfg_commit(NMDevice *self, gboolean commit_sync)
 {

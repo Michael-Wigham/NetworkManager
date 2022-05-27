@@ -298,6 +298,9 @@ typedef struct _NML3CfgPrivate {
 
     bool changed_configs_configs : 1;
     bool changed_configs_acd_state : 1;
+
+    bool commit_ignore_v4 : 1;
+    bool commit_ignore_v6 : 1;
 } NML3CfgPrivate;
 
 struct _NML3CfgClass {
@@ -4354,8 +4357,10 @@ _l3_commit(NML3Cfg *self, NML3CfgCommitType commit_type, gboolean is_idle)
 
     _nm_l3cfg_emit_signal_notify_simple(self, NM_L3_CONFIG_NOTIFY_TYPE_PRE_COMMIT);
 
-    _l3_commit_one(self, AF_INET, commit_type, changed_combined_l3cd, l3cd_old);
-    _l3_commit_one(self, AF_INET6, commit_type, changed_combined_l3cd, l3cd_old);
+    if (!self->priv.p->commit_ignore_v4)
+        _l3_commit_one(self, AF_INET, commit_type, changed_combined_l3cd, l3cd_old);
+    if (!self->priv.p->commit_ignore_v6)
+        _l3_commit_one(self, AF_INET6, commit_type, changed_combined_l3cd, l3cd_old);
 
     _l3_acd_data_process_changes(self);
 
@@ -4372,6 +4377,25 @@ _l3_commit(NML3Cfg *self, NML3CfgCommitType commit_type, gboolean is_idle)
     self->priv.p->commit_reentrant_count--;
 
     _nm_l3cfg_emit_signal_notify_simple(self, NM_L3_CONFIG_NOTIFY_TYPE_POST_COMMIT);
+}
+
+void
+nm_l3cfg_ignore_commit(NML3Cfg *self, int addr_family, gboolean ignore)
+{
+    nm_assert_addr_family_or_unspec(addr_family);
+
+    if (addr_family == AF_UNSPEC) {
+        nm_l3cfg_ignore_commit(self, AF_INET, ignore);
+        nm_l3cfg_ignore_commit(self, AF_INET6, ignore);
+        return;
+    }
+
+    _LOGT("commit ignored for IPv%c: %d", nm_utils_addr_family_to_char(addr_family), ignore);
+
+    if (addr_family == AF_INET)
+        self->priv.p->commit_ignore_v4 = ignore;
+    else
+        self->priv.p->commit_ignore_v6 = ignore;
 }
 
 /* See DOC(l3cfg:commit-type) */

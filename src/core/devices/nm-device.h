@@ -471,6 +471,7 @@ NML3Cfg *nm_device_get_l3cfg(NMDevice *self);
 const NML3ConfigData *nm_device_get_l3cd(NMDevice *self, gboolean get_commited);
 
 void nm_device_l3cfg_commit(NMDevice *self, NML3CfgCommitType commit_type, gboolean commit_sync);
+void nm_device_l3cfg_ignore_commit(NMDevice *self, int addr_family, gboolean ignore);
 
 int       nm_device_parent_get_ifindex(NMDevice *dev);
 NMDevice *nm_device_parent_get_device(NMDevice *dev);
