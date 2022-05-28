@@ -47,11 +47,11 @@ variables:
   #
   # This is done by running `ci-fairy generate-template` and possibly bump
   # ".default_tag".
-  FEDORA_TAG:  '2022-03-15.0-7b3d39bfc5ca'
-  UBUNTU_TAG:  '2022-03-15.0-2cd0d40675ab'
-  DEBIAN_TAG:  '2022-03-15.0-2cd0d40675ab'
-  CENTOS_TAG:  '2022-03-15.0-7b3d39bfc5ca'
-  ALPINE_TAG:  '2022-03-15.0-17672b94a192'
+  FEDORA_TAG:  '2022-05-28.0-8932a29ebb88'
+  UBUNTU_TAG:  '2022-05-28.0-d8df89cd3d96'
+  DEBIAN_TAG:  '2022-05-28.0-d8df89cd3d96'
+  CENTOS_TAG:  '2022-05-28.0-8932a29ebb88'
+  ALPINE_TAG:  '2022-05-28.0-6c987a7b1a8d'
 
   FEDORA_EXEC: 'bash .gitlab-ci/fedora-install.sh'
   UBUNTU_EXEC: 'bash .gitlab-ci/debian-install.sh'
@@ -154,6 +154,16 @@ fedora:36@container-prep:
   variables:
     GIT_STRATEGY: none
     FDO_DISTRIBUTION_VERSION: '36'
+    FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+    FDO_DISTRIBUTION_EXEC: $FEDORA_EXEC
+
+fedora:37@container-prep:
+  extends:
+    - .fdo.container-build@fedora
+  stage: prep
+  variables:
+    GIT_STRATEGY: none
+    FDO_DISTRIBUTION_VERSION: '37'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
     FDO_DISTRIBUTION_EXEC: $FEDORA_EXEC
 
@@ -444,6 +454,15 @@ fedora:36@container-clean:
     FDO_DISTRIBUTION_VERSION: '36'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
 
+fedora:37@container-clean:
+  extends:
+    - .container-clean
+  variables:
+    GIT_STRATEGY: none
+    CURRENT_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/fedora/$FDO_DISTRIBUTION_VERSION:$FDO_DISTRIBUTION_TAG
+    FDO_DISTRIBUTION_VERSION: '37'
+    FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+
 ubuntu:16.04@container-clean:
   extends:
     - .container-clean
@@ -704,23 +723,35 @@ t_fedora:35:
   extends:
     - .build@template
     - .fdo.distribution-image@fedora
-    - .nm_artifacts
+    - .nm_artifacts_debug
   variables:
     FDO_DISTRIBUTION_VERSION: '35'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
   needs:
     - "fedora:35@container-prep"
+  when: manual
 
 t_fedora:36:
   extends:
     - .build@template
     - .fdo.distribution-image@fedora
-    - .nm_artifacts_debug
+    - .nm_artifacts
   variables:
     FDO_DISTRIBUTION_VERSION: '36'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
   needs:
     - "fedora:36@container-prep"
+
+t_fedora:37:
+  extends:
+    - .build@template
+    - .fdo.distribution-image@fedora
+    - .nm_artifacts_debug
+  variables:
+    FDO_DISTRIBUTION_VERSION: '37'
+    FDO_DISTRIBUTION_TAG: $FEDORA_TAG
+  needs:
+    - "fedora:37@container-prep"
   when: manual
 
 t_ubuntu:16.04:
@@ -961,10 +992,10 @@ check-patch:
   extends:
     - .fdo.distribution-image@fedora
   variables:
-    FDO_DISTRIBUTION_VERSION: '35'
+    FDO_DISTRIBUTION_VERSION: '36'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
   needs:
-    - "fedora:35@container-prep"
+    - "fedora:36@container-prep"
   stage: test
   script:
     - date '+%Y%m%d-%H%M%S'; NM_CHECKPATCH_FETCH_UPSTREAM=1 contrib/scripts/checkpatch-feature-branch.sh
@@ -974,10 +1005,10 @@ check-tree:
   extends:
     - .fdo.distribution-image@fedora
   variables:
-    FDO_DISTRIBUTION_VERSION: '35'
+    FDO_DISTRIBUTION_VERSION: '36'
     FDO_DISTRIBUTION_TAG: $FEDORA_TAG
   needs:
-    - "fedora:35@container-prep"
+    - "fedora:36@container-prep"
   stage: test
   script:
     - date '+%Y%m%d-%H%M%S'; contrib/scripts/nm-python-black-format.sh --check
@@ -996,9 +1027,9 @@ pages:
   only:
     - main
   dependencies:
-    - t_fedora:35
+    - t_fedora:36
   needs:
-    - t_fedora:35
+    - t_fedora:36
 
 triage:issues:
   stage: triage
