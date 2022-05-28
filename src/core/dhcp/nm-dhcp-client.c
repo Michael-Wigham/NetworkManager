@@ -931,7 +931,7 @@ nm_dhcp_client_handle_event(gpointer      unused,
     nm_auto_unref_l3cd_init NML3ConfigData *l3cd = NULL;
     NMDhcpClientEventType                   client_event_type;
     NMPlatformIP6Address                    prefix = {
-        0,
+                           0,
     };
 
     g_return_val_if_fail(NM_IS_DHCP_CLIENT(self), FALSE);
